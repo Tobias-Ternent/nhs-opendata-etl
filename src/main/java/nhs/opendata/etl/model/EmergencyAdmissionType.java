@@ -5,13 +5,21 @@ package nhs.opendata.etl.model;
  */
 public class EmergencyAdmissionType {
 
-  private String name;
+  public enum EmergencyAdmissionTypeName {
+    ONE,
+    TWO,
+    THREE,
+    FOUR,
+    OTHER;
+  }
+
+  private EmergencyAdmissionTypeName name;
   private String value;
 
   public EmergencyAdmissionType() {
   }
 
-  public EmergencyAdmissionType(String name, String value) {
+  public EmergencyAdmissionType(EmergencyAdmissionTypeName name, String value) {
     this.name = name;
     this.value = value;
   }
@@ -30,7 +38,7 @@ public class EmergencyAdmissionType {
    *
    * @return Value of name.
    */
-  public String getName() {
+  public EmergencyAdmissionTypeName getName() {
     return name;
   }
 
@@ -48,7 +56,7 @@ public class EmergencyAdmissionType {
    *
    * @param name New value of name.
    */
-  public void setName(String name) {
+  public void setName(EmergencyAdmissionTypeName name) {
     this.name = name;
   }
 }

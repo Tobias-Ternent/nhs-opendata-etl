@@ -15,7 +15,7 @@ public class EmergencyAdmission {
   @Id
   private String id;
   private String basis;
-  private Period period;
+  private NhsPeriod nhsPeriod;
   private Provider provider;
   private List<EmergencyAdmissionType> emergencyAdmissionTypes;
 
@@ -76,12 +76,12 @@ public class EmergencyAdmission {
     this.emergencyAdmissionTypes = emergencyAdmissionTypes;
   }
 
-  public Period getPeriod() {
-    return period;
+  public NhsPeriod getNhsPeriod() {
+    return nhsPeriod;
   }
 
-  public void setPeriod(Period period) {
-    this.period = period;
+  public void setNhsPeriod(NhsPeriod nhsPeriod) {
+    this.nhsPeriod = nhsPeriod;
   }
 
   public Provider getProvider() {

@@ -2,6 +2,9 @@ package nhs.opendata.etl;
 
 import com.google.common.base.Splitter;
 import nhs.opendata.etl.model.EmergencyAdmission;
+import nhs.opendata.etl.model.EmergencyAdmissionType;
+import nhs.opendata.etl.model.NhsPeriod;
+import nhs.opendata.etl.model.Provider;
 import nhs.opendata.etl.repo.EmergencyAdmissionsRepo;
 import nhs.opendata.etl.utilities.Utilities;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,8 +57,10 @@ public class NhsOpendataEtlApplication implements CommandLineRunner {
       List<String> lineParts;
       boolean foundHeader = false;
       EmergencyAdmission emergencyAdmission;
+      NhsPeriod nhsPeriod;
       String defaultYear = ""; // todo get info from non-data lines instead
       String defaultPeriodName = ""; // todo get info from non-data lines instead
+      List<EmergencyAdmissionType> emergencyAdmissionTypes;
       while ((line = br.readLine()) != null) {
         lineNumber++;
         // todo use commons-csv instead?
@@ -82,35 +87,40 @@ public class NhsOpendataEtlApplication implements CommandLineRunner {
           if (cleanedLineParts.size()!=10) {
             throw new IOException("Data line isn't exactly in 10 parts: " + lineNumber + " : " + line);
           }
-          /*emergencyAdmission = new EmergencyAdmission();
+          emergencyAdmission = new EmergencyAdmission();
           emergencyAdmission.setBasis(cleanedLineParts.get(0));
-          emergencyAdmission.setYear(cleanedLineParts.get(1));
+          nhsPeriod = new NhsPeriod();
+          nhsPeriod.setYear(cleanedLineParts.get(1));
           if (StringUtils.isEmpty(defaultYear)) {
             if (!StringUtils.isEmpty(cleanedLineParts.get(1))) {
               defaultYear = cleanedLineParts.get(1);
             }
           }
-          if (StringUtils.isEmpty(emergencyAdmission.getYear())) {
-            emergencyAdmission.setYear(defaultYear);
+          if (StringUtils.isEmpty(nhsPeriod.getYear())) {
+            nhsPeriod.setYear(defaultYear);
           }
-          emergencyAdmission.setPeriodName(cleanedLineParts.get(2));
+          nhsPeriod.setName(cleanedLineParts.get(2));
           if (StringUtils.isEmpty(defaultPeriodName)) {
             if (!StringUtils.isEmpty(cleanedLineParts.get(2))) {
               defaultPeriodName = cleanedLineParts.get(2);
             }
           }
-          if (StringUtils.isEmpty(emergencyAdmission.getPeriodName())) {
-            emergencyAdmission.setPeriodName(defaultPeriodName);
+
+          if (StringUtils.isEmpty(nhsPeriod.getName())) {
+            nhsPeriod.setName(defaultPeriodName);
           }
-          emergencyAdmission.setProviderParentName(cleanedLineParts.get(3));
-          emergencyAdmission.setProviderOrgCode(cleanedLineParts.get(4));
-          emergencyAdmission.setProviderOrgName(cleanedLineParts.get(5));
-          emergencyAdmission.setEmergencyAdmType1(Integer.parseInt(cleanedLineParts.get(6))); // check int OK
-          emergencyAdmission.setEmergencyAdmType2(Integer.parseInt(cleanedLineParts.get(7))); // check int OK
-          emergencyAdmission.setEmergencyAdmType3(Integer.parseInt(cleanedLineParts.get(8))); // check int OK
-          emergencyAdmission.setEmergencyAdmOther(Integer.parseInt(cleanedLineParts.get(9))); // check int OK
+          emergencyAdmission.setNhsPeriod(nhsPeriod);
+          Provider provider = new Provider();
+          provider.setParentName(cleanedLineParts.get(3));
+          provider.setOrgCode(cleanedLineParts.get(4));
+          provider.setOrgName(cleanedLineParts.get(5));
+          emergencyAdmissionTypes = new ArrayList<>();
+          emergencyAdmissionTypes.add(new EmergencyAdmissionType(EmergencyAdmissionType.EmergencyAdmissionTypeName.ONE, cleanedLineParts.get(6)));
+          emergencyAdmissionTypes.add(new EmergencyAdmissionType(EmergencyAdmissionType.EmergencyAdmissionTypeName.TWO, cleanedLineParts.get(7)));
+          emergencyAdmissionTypes.add(new EmergencyAdmissionType(EmergencyAdmissionType.EmergencyAdmissionTypeName.THREE, cleanedLineParts.get(8)));
+          emergencyAdmissionTypes.add(new EmergencyAdmissionType(EmergencyAdmissionType.EmergencyAdmissionTypeName.OTHER, cleanedLineParts.get(9)));
+          emergencyAdmission.setEmergencyAdmissionTypes(emergencyAdmissionTypes);
           emergencyAdmissionsRepo.save(emergencyAdmission);
-          System.out.println("Finished loading in data: " + line);*/
         }
       }
     } catch (IOException e) {
@@ -119,14 +129,13 @@ public class NhsOpendataEtlApplication implements CommandLineRunner {
   }
 
 	/*
-	TODO
-	local unitTests
-	connection details
-	get data files
-	all departments
-	all time points
+	TODO logging
+	TODO local unitTests
+	TODO connection details
+	TODO get data files
+	TODO all departments
+	TODO all time points
 
-	post-implementation thoughts
-	migrate to python 3?
-	 */
+	TODO post-implementation thoughts
+	*/
 }
