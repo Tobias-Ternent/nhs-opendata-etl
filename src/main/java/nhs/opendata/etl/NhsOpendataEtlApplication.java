@@ -29,6 +29,7 @@ public class NhsOpendataEtlApplication implements CommandLineRunner {
   private final Logger log = LoggerFactory.getLogger(NhsOpendataEtlApplication.class);
   private File[] curatedAeAdmissionFiles;
   private File[] curatedAeAttendanceFiles;
+  private boolean cleanSlate = false;
 
   @Autowired
   EmergencyAdmissionsRepo emergencyAdmissionsRepo;
@@ -56,7 +57,10 @@ public class NhsOpendataEtlApplication implements CommandLineRunner {
   }
 
   private void parseAndLoadEmergencyAdmissions() {
-    emergencyAdmissionsRepo.deleteAll(); // clean slate
+    log.info("Starting to load Emergency Admissions data");
+    if (cleanSlate) {
+      emergencyAdmissionsRepo.deleteAll();
+    }
     if (curatedAeAdmissionFiles==null || curatedAeAdmissionFiles.length<1) {
       log.error("No A&E admissions files to load.");
     } else {
@@ -70,7 +74,6 @@ public class NhsOpendataEtlApplication implements CommandLineRunner {
           List<EmergencyAdmissionType> emergencyAdmissionTypes;
           while ((line = br.readLine()) != null) {
             lineNumber++;
-            // todo use commons-csv instead?
             lineParts = Splitter.on(Pattern.compile(",(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)")).splitToList(line);
             List<String> cleanedLineParts = new ArrayList<>(lineParts.size());
             for (int i = 0; i < lineParts.size(); i++) {
@@ -87,7 +90,21 @@ public class NhsOpendataEtlApplication implements CommandLineRunner {
                 String firstCellofLine = cleanedLineParts.get(0);
                 if (firstCellofLine.equalsIgnoreCase("Basis")) {
                   foundHeader = true; // header line
-                  // todo check headers are OK in relation to model class?
+                  log.debug("Found header line: " + line);
+                  if (!cleanedLineParts.get(1).equalsIgnoreCase("Year") ||
+                      !cleanedLineParts.get(2).equalsIgnoreCase("Period Name") ||
+                      !cleanedLineParts.get(3).equalsIgnoreCase("Provider Parent Name") ||
+                      !cleanedLineParts.get(4).equalsIgnoreCase("Provider Org Code") ||
+                      !cleanedLineParts.get(5).equalsIgnoreCase("Provider Org Name") ||
+                      !cleanedLineParts.get(6).equalsIgnoreCase("Emergency Adm Type 1") ||
+                      !cleanedLineParts.get(7).equalsIgnoreCase("Emergency Adm Type 2") ||
+                      !cleanedLineParts.get(8).equalsIgnoreCase("Emergency Adm Type 3") ||
+                      !cleanedLineParts.get(9).equalsIgnoreCase("Emergency Adm Other")
+                      ) {
+                    log.error("Incompatible header lines: " + line);
+                  }
+                } else {
+                  log.error("Missing header line: " + line);
                 }
               }
             } else { // data lines
@@ -109,21 +126,40 @@ public class NhsOpendataEtlApplication implements CommandLineRunner {
               emergencyAdmissionTypes.add(new EmergencyAdmissionType(EmergencyAdmissionType.EmergencyAdmissionTypeName.OTHER, cleanedLineParts.get(9)));
               emergencyAdmission.setEmergencyAdmissionTypes(emergencyAdmissionTypes);
               List<EmergencyAdmission> existingEmergencyAdmissions = emergencyAdmissionsRepo.
-                  findByBasisAndProviderAndStatsPeriodAndEmergencyAdmissionTypes(
+                  findByBasisAndProviderAndStatsPeriod(
                       emergencyAdmission.getBasis(),
                       emergencyAdmission.getProvider(),
-                      emergencyAdmission.getStatsPeriod(),
-                      emergencyAdmission.getEmergencyAdmissionTypes());
+                      emergencyAdmission.getStatsPeriod());
               if (existingEmergencyAdmissions.size() < 1) {
                 emergencyAdmissionsRepo.save(emergencyAdmission);
                 log.debug("Inserted new record, " + lineNumber + ": " + line);
               } else {
+                if (existingEmergencyAdmissions.size()>1) {
+                  log.error("More than 1 document found for: " + emergencyAdmission.getProvider().getOrgName() + " " +
+                      emergencyAdmission.getStatsPeriod().getYear() + " " + emergencyAdmission.getStatsPeriod().getName());
+                } else { // exactly 1 document
+                  EmergencyAdmission existingEmergencyAdmission = existingEmergencyAdmissions.get(0);
+                  boolean matches = true;
+                  for (EmergencyAdmissionType emergencyAdmissionType : existingEmergencyAdmission.getEmergencyAdmissionTypes()) {
+                    if (!emergencyAdmissionTypes.contains(emergencyAdmissionType)) {
+                      matches = false;
+                      log.debug(("Mismatch between admission types."));
+                      break;
+                    }
+                  }
+                  if (!matches) {
+                    emergencyAdmissionsRepo.delete(existingEmergencyAdmission.getId());
+                    emergencyAdmissionsRepo.save(emergencyAdmission);
+                    log.debug("Removed old entry, and replaced it with new entry for: " + emergencyAdmission.getProvider().getOrgName() + " " +
+                        emergencyAdmission.getStatsPeriod().getYear() + " " + emergencyAdmission.getStatsPeriod().getName());
+                  }
+                }
                 log.debug("Record already exists, skipping.");
               }
             }
           }
         } catch (IOException e) {
-          e.printStackTrace();
+          log.error("", e);
         }
         log.info("Finished processing A&E admissions data.");
       }
@@ -131,7 +167,6 @@ public class NhsOpendataEtlApplication implements CommandLineRunner {
   }
 
 	/*
-	TODO logging
 	TODO local unitTests
 	TODO connection details
 	TODO get data files
