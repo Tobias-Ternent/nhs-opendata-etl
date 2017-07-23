@@ -12,13 +12,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.util.StringUtils;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -40,10 +38,47 @@ public class NhsOpendataEtlApplication implements CommandLineRunner {
 
   @Override
   public void run(String... args) throws Exception {
-    // downloadAllFiles
-    // parseAndLoadAllAreas
+    // todo downloadAllFiles and cleanDownlaodedFiles?
     getCuratedFiles();
+    parseAndLoadAllAreas();
+  }
+
+  private void parseAndLoadAllAreas() {
     parseAndLoadEmergencyData();
+    /* todo remaining areas:
+      Ambulance Quality Indicators
+      Bed Availability and Occupancy
+      Cancelled Elective Operations
+      Cancer Patient Experience Survey
+      Cancer waiting times
+      Child Immunisation
+      Children and Young People with an Eating Disorder Waiting Times
+      Combined Performance Summary
+      Consultant-led Referral to Treatment Waiting Times
+      Critical Care Bed Capacity and Urgent Operations Cancelled
+      Delayed Transfers of Care
+      Dementia Assessment and Referral
+      Diagnostics Waiting Times and Activity
+      Diagnostic Imaging Dataset
+      Direct Access Audiology
+      Early Intervention in Psychosis Waiting Times
+      Extended access to general practice
+      Friends and Family Test
+      GP Patient Survey
+      Health Visitors
+      Hospital Activity
+      Integrated Performance Measures Monitoring
+      Maternity and Breastfeeding
+      Mental Health Community Teams Activity
+      Mixed-Sex Accommodation
+      National Patient and Staff Surveys
+      NHS 111 Minimum Data Set
+      NHS Staff Survey in England
+      Overall Patient Experience Scores
+      Patient Reported Outcome Measures (PROMs)
+      Venous Thromboembolism (VTE) Risk Assessment
+      Winter Daily Situation Reports
+      */
   }
 
   private void getCuratedFiles() {
@@ -53,7 +88,8 @@ public class NhsOpendataEtlApplication implements CommandLineRunner {
 
   private void parseAndLoadEmergencyData() {
     parseAndLoadEmergencyAdmissions();
-    //todo parseAndLoadEmergencyAttendances();
+    // todo parseAndLoadEmergencyAttendances();
+    // todo refactor into separate class
   }
 
   private void parseAndLoadEmergencyAdmissions() {
