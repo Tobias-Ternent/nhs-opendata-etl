@@ -9,13 +9,13 @@ import java.util.List;
  * Created by tobias on 2017-07-15.
  */
 
-@Document(collection = "emergencyadmissions-dev")
+@Document(collection = "emergencyadmissions")
 public class EmergencyAdmission {
 
   @Id
   private String id;
   private String basis;
-  private NhsPeriod nhsPeriod;
+  private StatsPeriod statsPeriod;
   private Provider provider;
   private List<EmergencyAdmissionType> emergencyAdmissionTypes;
 
@@ -76,12 +76,12 @@ public class EmergencyAdmission {
     this.emergencyAdmissionTypes = emergencyAdmissionTypes;
   }
 
-  public NhsPeriod getNhsPeriod() {
-    return nhsPeriod;
+  public StatsPeriod getStatsPeriod() {
+    return statsPeriod;
   }
 
-  public void setNhsPeriod(NhsPeriod nhsPeriod) {
-    this.nhsPeriod = nhsPeriod;
+  public void setStatsPeriod(StatsPeriod statsPeriod) {
+    this.statsPeriod = statsPeriod;
   }
 
   public Provider getProvider() {

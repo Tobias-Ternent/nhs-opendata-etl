@@ -9,8 +9,7 @@ public class EmergencyAdmissionType {
     ONE,
     TWO,
     THREE,
-    FOUR,
-    OTHER;
+    OTHER
   }
 
   private EmergencyAdmissionTypeName name;

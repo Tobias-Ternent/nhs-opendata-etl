@@ -3,15 +3,15 @@ package nhs.opendata.etl.model;
 /**
  * Created by tobias on 2017-07-16.
  */
-public class NhsPeriod {
+public class StatsPeriod {
 
     private String year;
     private String name;
 
-    public NhsPeriod() {
+    public StatsPeriod() {
     }
 
-    public NhsPeriod(String year, String name) {
+    public StatsPeriod(String year, String name) {
         this.year = year;
         this.name = name;
     }
